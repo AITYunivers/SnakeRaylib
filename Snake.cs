@@ -10,6 +10,7 @@ namespace SnakeRaylib
         private static Random _rand = new Random();
         private static double _snakeSpeed = 0.9f;
         private static int _borderWidth = 1;
+        private static bool _fadeSnake = true;
 
         public static List<Vector2> SnakeBody = new List<Vector2>();
         public static int SnakeLength = 1;
@@ -121,15 +122,6 @@ namespace SnakeRaylib
                 if (snakeBody.X < 0 || snakeBody.X >= _gridSize ||
                     snakeBody.Y < 0 || snakeBody.Y >= _gridSize)
                     collidedDeath = true;
-                for (int ii = 0; ii < SnakeBody.Count; ii++)
-                    if (i != ii && snakeBody.Equals(SnakeBody[ii]))
-                        collidedDeath = true;
-            }
-
-            if (collidedDeath)
-            {
-                SnakeDirection = Direction.Paused;
-                Dead = true;
             }
 
             if (collidedApple)
@@ -146,17 +138,36 @@ namespace SnakeRaylib
 
             for (int i = 0; i < SnakeBody.Count - SnakeLength; i++)
                 SnakeBody.RemoveAt(0);
+
+            for (int i = 0; i < SnakeBody.Count; i++)
+            {
+                Vector2 snakeBody = SnakeBody[i];
+                for (int ii = 0; ii < SnakeBody.Count; ii++)
+                    if (i != ii && snakeBody.Equals(SnakeBody[ii]))
+                        collidedDeath = true;
+            }
+
+            if (collidedDeath)
+            {
+                SnakeDirection = Direction.Paused;
+                Dead = true;
+            }
         }
 
         static void DrawSnake()
         {
-            foreach (Vector2 snakeBody in SnakeBody)
+            for (int i = 0; i < SnakeBody.Count; i++)
             {
+                Vector2 snakeBody = SnakeBody[i];
                 Rectangle snakeBox = new Rectangle(snakeBody.X * _cellSize + _borderWidth,
                                                    snakeBody.Y * _cellSize + _borderWidth,
                                                    _cellSize - _borderWidth,
                                                    _cellSize - _borderWidth);
-                Raylib.DrawRectangleRec(snakeBox, Color.Green);
+
+                if (_fadeSnake)
+                    Raylib.DrawRectangleRec(snakeBox, new Color(0, (int)(255 - ((float)(SnakeBody.Count - 1 - i) / SnakeBody.Count * 200.0f)), 0, 255));
+                else
+                    Raylib.DrawRectangleRec(snakeBox, new Color(0, 255, 0, 255));
             }
         }
 
