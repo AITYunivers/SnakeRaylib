@@ -11,6 +11,7 @@ namespace SnakeRaylib
         private static double _snakeSpeed = 0.9f;
         private static int _borderWidth = 1;
         private static bool _fadeSnake = true;
+        private static int _defaultLength = 1;
 
         public static List<Vector2> SnakeBody = new List<Vector2>();
         public static int SnakeLength = 1;
@@ -23,6 +24,8 @@ namespace SnakeRaylib
 
         static void Main(string[] args)
         {
+            ReadParameters(args);
+            Raylib.SetTraceLogLevel(TraceLogLevel.Fatal);
             Raylib.InitWindow(_cellSize * _gridSize, _cellSize * _gridSize, "Snake Raylib");
             SnakeBody.Add(new Vector2(_rand.Next(_gridSize), _rand.Next(_gridSize)));
             ResetApple();
@@ -58,7 +61,7 @@ namespace SnakeRaylib
                     SnakeBody.Clear();
                     SnakeBody.Add(new Vector2(_rand.Next(_gridSize), _rand.Next(_gridSize)));
                     ResetApple();
-                    SnakeLength = 1;
+                    SnakeLength = _defaultLength;
                     MoveTimer = 0.0;
                     MoveDebounce = false;
                     Dead = false;
@@ -210,6 +213,48 @@ namespace SnakeRaylib
         {
             Raylib.DrawText("You won!", Raylib.GetScreenWidth() / 2 - 40, Raylib.GetScreenHeight() / 2 - 20, 20, Color.White);
         }
+        static void ReadParameters(string[] args)
+        {
+            for (int i = 0; i < args.Length; i++)
+            {
+                switch (args[i].ToLower())
+                {
+                    case "-cellsize":
+                        if (int.TryParse(args[++i], out int cellSize))
+                            _cellSize = Math.Max(1, cellSize);
+                        break;
+                    case "-gridsize":
+                        if (int.TryParse(args[++i], out int gridSize))
+                            _gridSize = Math.Max(1, gridSize);
+                        break;
+                    case "-bordersize":
+                        if (int.TryParse(args[++i], out int borderWidth))
+                            _borderWidth = Math.Max(0, borderWidth);
+                        break;
+                    case "-speed":
+                        if (double.TryParse(args[++i], out double snakeSpeed))
+                            _snakeSpeed = Math.Clamp(snakeSpeed, 0.0, 1.0);
+                        break;
+                    case "-dontfadetail":
+                        _fadeSnake = false;
+                        break;
+                    case "-defaultscore":
+                        if (int.TryParse(args[++i], out int defaultLength))
+                            _defaultLength = Math.Max(1, defaultLength);
+                        SnakeLength = _defaultLength;
+                        break;
+                    case "-fps":
+                        if (int.TryParse(args[++i], out int fps))
+                            Raylib.SetTargetFPS(Math.Max(1, fps));
+                        break;
+                    case "-h":
+                    case "-help":
+                        Console.WriteLine(Help);
+                        Environment.Exit(0);
+                        break;
+                }
+            }
+        }
 
         public enum Direction
         {
@@ -219,5 +264,16 @@ namespace SnakeRaylib
             Left,
             Right
         }
+
+        private static string Help =
+@"Commands:
+`-Help` or `-h` | Shows this menu
+`-CellSize`     | Sets the width and height in pixels of each grid space/cell (Default: 20)
+`-GridSize`     | Sets the width and height in cells of the grid (Default: 20)
+`-BorderSize`   | Sets the thickness in pixels of he black border around each cell (Default: 1)
+`-Speed`        | Sets the speed of the snake, 1.0 being every frame, 0.0 being every second (Default: 0.9)
+`-DontFadeTail` | Disables the effect that makes the tail cells darker based on length
+`-DefaultScore` | Sets the default length of the Snake (Default: 1)
+`-FPS`          | Sets the games frame rate (Default: Unlimited)";
     }
 }
