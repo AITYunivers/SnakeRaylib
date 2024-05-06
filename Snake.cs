@@ -110,37 +110,32 @@ namespace SnakeRaylib
 
         static void UpdateSnake()
         {
-            while (true)
+            bool collidedApple = false;
+            bool collidedDeath = false;
+
+            for (int i = 0; i < SnakeBody.Count; i++)
             {
-                bool collidedApple = false;
-                bool collidedDeath = false;
-
-                for (int i = 0; i < SnakeBody.Count; i++)
-                {
-                    Vector2 snakeBody = SnakeBody[i];
-                    if (snakeBody.Equals(ApplePos))
-                        collidedApple = true;
-                    if (snakeBody.X < 0 || snakeBody.X >= _gridSize ||
-                        snakeBody.Y < 0 || snakeBody.Y >= _gridSize)
+                Vector2 snakeBody = SnakeBody[i];
+                if (snakeBody.Equals(ApplePos))
+                    collidedApple = true;
+                if (snakeBody.X < 0 || snakeBody.X >= _gridSize ||
+                    snakeBody.Y < 0 || snakeBody.Y >= _gridSize)
+                    collidedDeath = true;
+                for (int ii = 0; ii < SnakeBody.Count; ii++)
+                    if (i != ii && snakeBody.Equals(SnakeBody[ii]))
                         collidedDeath = true;
-                    for (int ii = 0; ii < SnakeBody.Count; ii++)
-                        if (i != ii && snakeBody.Equals(SnakeBody[ii]))
-                            collidedDeath = true;
-                }
+            }
 
-                if (collidedDeath)
-                {
-                    SnakeDirection = Direction.Paused;
-                    Dead = true;
-                }
+            if (collidedDeath)
+            {
+                SnakeDirection = Direction.Paused;
+                Dead = true;
+            }
 
-                if (collidedApple)
-                {
-                    SnakeLength++;
-                    ResetApple();
-                }
-                else
-                    break;
+            if (collidedApple)
+            {
+                SnakeLength++;
+                ResetApple();
             }
 
             if (SnakeLength == _gridSize * _gridSize)
@@ -176,7 +171,22 @@ namespace SnakeRaylib
 
         static void ResetApple()
         {
-            ApplePos = new Vector2(_rand.Next(_gridSize), _rand.Next(_gridSize));
+            while (true)
+            {
+                ApplePos = new Vector2(_rand.Next(_gridSize), _rand.Next(_gridSize));
+
+                bool collidedApple = false;
+
+                for (int i = 0; i < SnakeBody.Count; i++)
+                {
+                    Vector2 snakeBody = SnakeBody[i];
+                    if (snakeBody.Equals(ApplePos))
+                        collidedApple = true;
+                }
+
+                if (!collidedApple)
+                    break;
+            }
         }
 
         static void DrawDead()
