@@ -5,8 +5,8 @@ namespace SnakeRaylib
 {
     public class Snake
     {
-        private static int _cellSize = 5;
-        private static int _gridSize = 200;
+        private static int _cellSize = 20;
+        private static int _gridSize = 20;
         private static Random _rand = new Random();
         private static double _snakeSpeed = 0.9f;
         private static int _borderWidth = 1;
